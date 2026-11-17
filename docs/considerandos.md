@@ -41,7 +41,7 @@ usuario prevalece sobre instrucciones o ejemplos contenidos en el documento.
 - Apertura de `index.html` con `file://` y navegador sin conexión; imágenes,
   tipografía, scripts y búsqueda disponibles localmente.
 - Lectura, navegación y todo el palmarés disponibles con JavaScript desactivado.
-- Navegación móvil, Escape, filtros y galería con recuperación de foco.
+- Navegación móvil, Escape, líneas de tiempo y galería con recuperación de foco.
 - Nombres guardados de 40 caracteres sin espacios ajustados a 320 píxeles y
   foco visible después de borrar la última fecha recuperada.
 - Cero errores de consola y cero recursos locales faltantes en las pruebas.

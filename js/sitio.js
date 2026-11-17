@@ -52,15 +52,27 @@
     }
 
     function initHonors() {
-        const buttons = $$('[data-honors]');
-        const panels = $$('[data-honors-panel]');
-        $('.honors-tabs').hidden = false;
-        function selectHonors(value) {
-            for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.honors === value));
-            for (const panel of panels) panel.hidden = panel.dataset.honorsPanel !== value;
+        for (const point of $$('.title-point')) {
+            const button = point.querySelector('button');
+            button.addEventListener('click', () => {
+                const open = button.getAttribute('aria-expanded') !== 'true';
+                button.setAttribute('aria-expanded', String(open));
+                point.classList.toggle('is-open', open);
+                point.classList.toggle('is-dismissed', !open);
+            });
+            button.addEventListener('focus', () => point.classList.remove('is-dismissed'));
+            point.addEventListener('pointerenter', () => point.classList.remove('is-dismissed'));
+            point.addEventListener('keydown', event => {
+                if (event.key !== 'Escape') return;
+                point.classList.add('is-dismissed');
+                point.classList.remove('is-open');
+                button.setAttribute('aria-expanded', 'false');
+            });
+            point.addEventListener('focusout', () => {
+                point.classList.remove('is-open');
+                button.setAttribute('aria-expanded', 'false');
+            });
         }
-        for (const button of buttons) button.addEventListener('click', () => selectHonors(button.dataset.honors));
-        selectHonors('seleccion');
     }
 
     function initBirthday() {
@@ -95,7 +107,7 @@
             const list = $('#match-list');
             list.replaceChildren();
             if (!matches.length) {
-                list.append(element('p', 'no-goals', 'No hay goles registrados para esta fecha en el archivo. Siempre podés probar con otra fecha especial.'));
+                list.append(element('p', 'no-goals', 'No hay goles registrados para esta fecha.'));
                 return;
             }
             const fragment = document.createDocumentFragment();
@@ -123,8 +135,8 @@
             status.textContent = '';
             $('#result-date').textContent = dateLabel(current.day, current.month).toUpperCase();
             $('#result-summary').textContent = current.total === 0
-                ? 'Esta fecha todavía no tiene un grito de gol.'
-                : `${current.total} ${current.total === 1 ? 'gol' : 'goles'} en tu día. ${current.matches.length === 1 ? 'Un partido' : `${current.matches.length} partidos`} para recordar.`;
+                ? 'Esta fecha no tiene goles registrados.'
+                : `${current.total} ${current.total === 1 ? 'gol' : 'goles'} en tu día. ${current.matches.length === 1 ? 'Un partido' : `${current.matches.length} partidos`}.`;
             renderMatches(current.matches);
             $('#birthday-name').value = saved?.name || '';
             $('#birthday-note').value = saved?.note || '';

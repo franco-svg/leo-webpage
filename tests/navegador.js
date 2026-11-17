@@ -28,10 +28,14 @@ fs.mkdirSync(output, { recursive: true });
         await page.screenshot({ path: path.join(output, 'escritorio.png'), fullPage: true });
         console.log('OK · siete secciones, recursos y vista de escritorio');
 
-        await page.locator('[data-honors="clubes"]').click();
-        assert.equal(await page.locator('[data-honors-panel="clubes"]').isVisible(), true);
-        assert.equal(await page.locator('[data-honors-panel="seleccion"]').isVisible(), false);
-        console.log('OK · filtros de palmarés');
+        assert.equal(await page.locator('.title-timeline').count(), 2);
+        assert.equal(await page.locator('.title-dot').count(), 46);
+        const dot = page.locator('.title-dot').first();
+        await dot.focus();
+        assert.equal(await dot.locator('..').locator('.title-tooltip').evaluate(el => getComputedStyle(el).visibility), 'visible');
+        await page.keyboard.press('Escape');
+        assert.equal(await dot.locator('..').locator('.title-tooltip').evaluate(el => getComputedStyle(el).visibility), 'hidden');
+        console.log('OK · líneas de tiempo, 46 títulos, foco y Escape');
 
         await page.locator('#birthday-day').fill('31');
         await page.locator('#birthday-month').selectOption('4');
@@ -140,7 +144,7 @@ fs.mkdirSync(output, { recursive: true });
         const staticPage = await nojs.newPage();
         await staticPage.goto(base);
         assert.equal(await staticPage.locator('#main-nav').isVisible(), true);
-        assert.equal(await staticPage.locator('[data-honors-panel]:visible').count(), 3);
+        assert.equal(await staticPage.locator('.title-dot').count(), 46);
         await nojs.close();
         console.log('OK · lectura y navegación sin JavaScript');
 

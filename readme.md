@@ -10,7 +10,7 @@ Los navegadores administran `localStorage` por origen. Las fechas guardadas al a
 
 ## Las mismas siete secciones
 
-Inicio, Biografía, Trayectoria, Palmarés, Estadísticas, Momentos y Galería. El buscador de cumpleaños está dentro de Estadísticas. El menú se adapta a celulares, el palmarés se filtra por categoría y la galería permite ampliar las imágenes y cerrarlas con Escape.
+Inicio, Biografía, Trayectoria, Palmarés, Estadísticas, Momentos y Galería. El buscador de cumpleaños está dentro de Estadísticas. El menú se adapta a celulares, el palmarés muestra dos líneas de tiempo paralelas, de clubes y selección, con detalles por título y totales hasta 2024 y la galería permite ampliar las imágenes y cerrarlas con Escape.
 
 La selección de palmarés llega hasta 2024; no se presenta como un total actual. Las estadísticas de Barcelona y PSG corresponden a sus etapas completas. El archivo de goles tiene su propia fecha de corte.
 
@@ -39,7 +39,7 @@ Las fotografías proceden de Wikimedia Commons. Autores, fuentes y licencias CC 
 - `css/estilos.min.css`: copia comprimida utilizada por la página.
 - `js/goles.js`: datos locales con fuente y fecha de corte.
 - `js/cumpleanos.js`: validación, agrupación y persistencia, sin dependencia del DOM.
-- `js/sitio.js`: navegación, formulario, guardados, filtros y galería.
+- `js/sitio.js`: navegación, formulario, guardados, líneas de tiempo y galería.
 - `imagenes/` y `fuentes/`: recursos locales y sus créditos.
 - `tests/`: pruebas de lógica y una revisión opcional con navegador.
 - `docs/considerandos.md`: cobertura del PDF y alcance de las verificaciones.
@@ -60,4 +60,4 @@ node herramientas/comprimir-css.js
 
 La revisión opcional `tests/navegador.js` utiliza Playwright **solo en el entorno de desarrollo**. Requiere tenerlo disponible y un servidor estático en el puerto 4173; `LEO_TEST_URL` cambia la dirección y `LEO_BROWSER=chrome` selecciona Chrome en lugar de Edge. El sitio no utiliza Playwright, Python ni ningún paquete de pruebas al visitarlo.
 
-Se verificó en Edge y Chrome: 320, 390, 768, 1024 y 1440 píxeles; teclado, filtros, galería, validación, guardado, recarga y borrado; almacenamiento bloqueado; lectura sin JavaScript; apertura directa sin conexión; consola sin errores ni recursos locales faltantes. HTML y CSS se revisaron con parsers locales. Axe no detectó infracciones automáticas WCAG 2/2.1 A/AA en las vistas revisadas; esto no equivale a una certificación integral de accesibilidad.
+Se verificó en Edge y Chrome: 320, 390, 768, 1024 y 1440 píxeles; teclado, líneas de tiempo, galería, validación, guardado, recarga y borrado; almacenamiento bloqueado; lectura sin JavaScript; apertura directa sin conexión; consola sin errores ni recursos locales faltantes. HTML y CSS se revisaron con parsers locales. Axe no detectó infracciones automáticas WCAG 2/2.1 A/AA en las vistas revisadas; esto no equivale a una certificación integral de accesibilidad.
