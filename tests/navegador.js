@@ -28,6 +28,19 @@ fs.mkdirSync(output, { recursive: true });
         await page.screenshot({ path: path.join(output, 'escritorio.png'), fullPage: true });
         console.log('OK · siete secciones, recursos y vista de escritorio');
 
+        for (let stage = 0; stage < 6; stage++) {
+            const copy = page.locator('.biography-stage:visible .biography-copy');
+            assert.equal(await copy.locator(':scope > p').count(), 5);
+            assert.equal(await copy.locator(':scope > h4').count(), 5);
+            assert.equal(await copy.locator(':scope > h4 + p').count(), 5);
+            assert.equal(await page.locator('#bio-position').textContent(), `${stage + 1} / 6`);
+            if (stage < 5) await page.locator('#bio-next').click();
+        }
+        assert.equal(await page.locator('#bio-next').isDisabled(), true);
+        for (let stage = 0; stage < 5; stage++) await page.locator('#bio-prev').click();
+        assert.equal(await page.locator('#bio-prev').isDisabled(), true);
+        console.log('OK · seis etapas con cinco bloques de subtítulo y párrafo');
+
         assert.equal(await page.locator('.title-timeline').count(), 3);
         assert.equal(await page.locator('.title-dot').count(), 95);
         assert.equal(await page.locator('[data-timeline="clubs"] .title-dot').count(), 42);

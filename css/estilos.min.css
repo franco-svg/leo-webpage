@@ -107,8 +107,11 @@ h2 em, .birthday h3 em { font-weight: 400; color: var(--blue); }
 .biography-copy h3 { font-size: .88rem; font-weight: 700; margin-top: 1.5rem; }
 .biography-copy h3 + p { font-size: .83rem; color: var(--muted); margin-top: .5rem; }
 .biography-copy p strong { color: var(--ink); font-weight: 600; }
-.biography-copy > p { font-size: .85rem; color: var(--muted); margin-top: 1.4rem; }
-.biography-copy h3 { font-size: 1.2rem; margin-top: 0; }
+.biography-stage-heading { margin-bottom: 1.5rem; }
+.biography-stage-heading h3 { font-size: 1rem; font-weight: 600; }
+.biography-copy > h4 { font-size: .88rem; font-weight: 700; margin-top: 1.5rem; }
+.biography-copy > h4:first-child { margin-top: 0; }
+.biography-copy > p { font-size: .83rem; color: var(--muted); margin-top: .5rem; line-height: 1.7; }
 .biography-controls { display: flex; align-items: center; justify-content: flex-end; gap: 1.5rem; margin-top: 1.5rem; }
 .biography-controls button { background: transparent; border: 1px solid var(--line); width: 3.5rem; height: 3rem; font-size: 1.6rem; }
 .biography-controls button:disabled { opacity: .35; cursor: default; }
