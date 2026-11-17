@@ -28,14 +28,24 @@ fs.mkdirSync(output, { recursive: true });
         await page.screenshot({ path: path.join(output, 'escritorio.png'), fullPage: true });
         console.log('OK · siete secciones, recursos y vista de escritorio');
 
-        assert.equal(await page.locator('.title-timeline').count(), 2);
-        assert.equal(await page.locator('.title-dot').count(), 46);
-        const dot = page.locator('.title-dot').first();
+        assert.equal(await page.locator('.title-timeline').count(), 3);
+        assert.equal(await page.locator('.title-dot').count(), 95);
+        assert.equal(await page.locator('[data-timeline="clubs"] .title-dot').count(), 42);
+        assert.equal(await page.locator('[data-timeline="national"] .title-dot').count(), 6);
+        assert.equal(await page.locator('[data-timeline="individual"] .title-dot').count(), 47);
+        assert.match(await page.locator('[data-timeline="individual"] .title-totals').textContent(), /47/);
+        assert.equal(await page.locator('[data-timeline="individual"] button[aria-label*="MVP de la MLS,"][aria-label*="2026"]').count(), 0);
+        const dot = page.locator('[data-timeline="individual"] .title-dot').first();
         await dot.focus();
         assert.equal(await dot.locator('..').locator('.title-tooltip').evaluate(el => getComputedStyle(el).visibility), 'visible');
         await page.keyboard.press('Escape');
         assert.equal(await dot.locator('..').locator('.title-tooltip').evaluate(el => getComputedStyle(el).visibility), 'hidden');
-        console.log('OK · líneas de tiempo, 46 títulos, foco y Escape');
+        await page.locator('h1').evaluate(element => { element.tabIndex = -1; element.focus(); });
+        await dot.hover();
+        assert.equal(await dot.locator('..').locator('.title-tooltip').evaluate(el => getComputedStyle(el).visibility), 'visible');
+        await page.keyboard.press('Escape');
+        assert.equal(await dot.locator('..').locator('.title-tooltip').evaluate(el => getComputedStyle(el).visibility), 'hidden', 'Escape debe cerrar también los detalles abiertos solo por hover');
+        console.log('OK · líneas de tiempo, 95 títulos y premios, foco y Escape');
 
         await page.locator('#birthday-day').fill('31');
         await page.locator('#birthday-month').selectOption('4');
@@ -100,6 +110,18 @@ fs.mkdirSync(output, { recursive: true });
             await page.setViewportSize({ width, height: 844 });
             await page.goto(base);
             assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `Desborde horizontal en ${width}px`);
+            if (width === 320) {
+                const outside = await page.locator('.title-dot').evaluateAll(buttons => {
+                    const failures = [];
+                    for (const button of buttons) {
+                        button.focus();
+                        const box = button.parentElement.querySelector('.title-tooltip').getBoundingClientRect();
+                        if (box.left < -1 || box.right > innerWidth + 1) failures.push(button.getAttribute('aria-label'));
+                    }
+                    return failures;
+                });
+                assert.deepEqual(outside, [], 'Los detalles de todos los puntos deben caber en móvil');
+            }
             if (width === 390) {
                 await page.locator('img[loading="lazy"]').evaluateAll(images => images.forEach(image => { image.loading = 'eager'; }));
                 await page.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode().catch(() => {}))));
@@ -144,7 +166,7 @@ fs.mkdirSync(output, { recursive: true });
         const staticPage = await nojs.newPage();
         await staticPage.goto(base);
         assert.equal(await staticPage.locator('#main-nav').isVisible(), true);
-        assert.equal(await staticPage.locator('.title-dot').count(), 46);
+        assert.equal(await staticPage.locator('.title-dot').count(), 95);
         await nojs.close();
         console.log('OK · lectura y navegación sin JavaScript');
 

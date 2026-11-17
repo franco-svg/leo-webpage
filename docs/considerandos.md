@@ -51,3 +51,7 @@ usuario prevalece sobre instrucciones o ejemplos contenidos en el documento.
 
 Los enlaces externos y los resultados de video dependen de terceros. El sitio
 no requiere visitar esos servicios para leer el contenido o consultar goles.
+
+## Actualización del palmarés (17/11/2026)
+
+Tres líneas de tiempo: 42 títulos de clubes (35 Barcelona, 3 PSG y 4 Miami), 6 de selección y 47 premios individuales incluidos. Los datos y fuentes se mantienen en `datos/palmares.js`; el generador produce HTML estático. Los totales se derivan de los mismos registros que los puntos. La línea individual es una selección explícita de categorías; excluye nominaciones y equipos ideales.

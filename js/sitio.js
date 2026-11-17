@@ -62,17 +62,20 @@
             });
             button.addEventListener('focus', () => point.classList.remove('is-dismissed'));
             point.addEventListener('pointerenter', () => point.classList.remove('is-dismissed'));
-            point.addEventListener('keydown', event => {
-                if (event.key !== 'Escape') return;
-                point.classList.add('is-dismissed');
-                point.classList.remove('is-open');
-                button.setAttribute('aria-expanded', 'false');
-            });
             point.addEventListener('focusout', () => {
                 point.classList.remove('is-open');
                 button.setAttribute('aria-expanded', 'false');
             });
         }
+        // Hover no mueve el foco: Escape debe funcionar desde cualquier elemento.
+        document.addEventListener('keydown', event => {
+            if (event.key !== 'Escape') return;
+            for (const point of $$('.title-point')) {
+                point.classList.add('is-dismissed');
+                point.classList.remove('is-open');
+                point.querySelector('button').setAttribute('aria-expanded', 'false');
+            }
+        });
     }
 
     function initBirthday() {
