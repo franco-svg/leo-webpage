@@ -233,6 +233,27 @@
         dialog.addEventListener('close', () => previousLink?.focus({ preventScroll: true }));
     }
 
+    function initBiography() {
+        const stages = $$('.biography-stage');
+        let position = 0;
+        const previous = $('#bio-prev');
+        const next = $('#bio-next');
+        $('.biography-controls').hidden = false;
+        function show() {
+            stages.forEach((stage, index) => { stage.hidden = index !== position; });
+            previous.disabled = position === 0;
+            next.disabled = position === stages.length - 1;
+            $('#bio-position').textContent = `${position + 1} / ${stages.length}`;
+            // Mantener el foco en un control habilitado al llegar a un extremo.
+            if (document.activeElement === previous && previous.disabled) next.focus();
+            if (document.activeElement === next && next.disabled) previous.focus();
+        }
+        previous.addEventListener('click', () => { position = Math.max(0, position - 1); show(); });
+        next.addEventListener('click', () => { position = Math.min(stages.length - 1, position + 1); show(); });
+        show();
+    }
+
+    initBiography();
     initNavigation();
     initHonors();
     initBirthday();

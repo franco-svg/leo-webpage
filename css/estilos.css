@@ -109,6 +109,14 @@ h2 em, .birthday h3 em { font-weight: 400; color: var(--blue); }
 .biography-copy h3 { font-size: .88rem; font-weight: 700; margin-top: 1.5rem; }
 .biography-copy h3 + p { font-size: .83rem; color: var(--muted); margin-top: .5rem; }
 .biography-copy p strong { color: var(--ink); font-weight: 600; }
+.biography-copy > p { font-size: .85rem; color: var(--muted); margin-top: 1.4rem; }
+.biography-copy h3 { font-size: 1.2rem; margin-top: 0; }
+.biography-controls { display: flex; align-items: center; justify-content: flex-end; gap: 1.5rem; margin-top: 1.5rem; }
+.biography-controls button { background: transparent; border: 1px solid var(--line); width: 3.5rem; height: 3rem; font-size: 1.6rem; }
+.biography-controls button:disabled { opacity: .35; cursor: default; }
+.biography-stage + .biography-stage { margin-top: 2rem; }
+.js-enabled .biography-stage { margin-top: 0; }
+@media(max-width:36rem) { .biography-stage .biography-grid { flex-direction: column; } }
 .player-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; border-block: 1px solid var(--line); padding-block: 1.5rem; margin-top: 2rem; }
 .player-facts dt { font-size: .53rem; letter-spacing: .1em; color: var(--muted); }
 .player-facts dd { font-size: .74rem; margin-top: .35rem; }
