@@ -1,5 +1,7 @@
 # Messi: de Rosario al mundo
 
+Este documento conserva el diseño y plan iniciales. La página evolucionó después a nueve secciones y cambió parte de su presentación. Para consultar la implementación actual, ver [explicacion-secciones.md](explicacion-secciones.md) y la revisión de [considerandos.md](considerandos.md).
+
 ## Diseño y alcance
 
 Se conserva la navegación y las siete secciones existentes: Inicio, Biografía,

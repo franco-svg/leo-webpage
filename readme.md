@@ -53,6 +53,7 @@ Las flechas de la galería recorren cuatro imágenes por vez en escritorio, dos 
 - `herramientas/generar-creditos.js`: actualiza únicamente el desplegable de créditos del footer.
 - `tests/`: pruebas de lógica y una revisión opcional con navegador.
 - `docs/considerandos.md`: cobertura del PDF y alcance de las verificaciones.
+- `docs/explicacion-secciones.md`: explicación del HTML, CSS y JavaScript de cada sección y sus puntos de edición.
 
 ## Verificación y mantenimiento
 
