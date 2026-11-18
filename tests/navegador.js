@@ -19,27 +19,105 @@ fs.mkdirSync(output, { recursive: true });
     try {
         await page.goto(base);
         await page.evaluate(() => document.fonts.ready);
+        const styles = await page.evaluate(sources => sources.map(source => {
+            const sheet = new CSSStyleSheet();
+            sheet.replaceSync(source);
+            return [...sheet.cssRules].map(rule => rule.cssText);
+        }), ['css/estilos.css', 'css/estilos.min.css'].map(file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')));
+        assert.deepEqual(styles[1], styles[0], 'El CSS comprimido debe conservar las reglas del original');
         assert.equal(await page.locator('h1').count(), 1);
-        assert.equal(await page.locator('main > section').count(), 7);
-        assert.equal(await page.locator('#main-nav a').count(), 7);
+        assert.equal(await page.locator('main > section').count(), 9);
+        assert.equal(await page.locator('#main-nav a').count(), 9);
+        assert.equal(await page.locator('main > section#cumpleanos #birthday-form').count(), 1);
+        assert.equal(await page.locator('#estadisticas #birthday-form').count(), 0);
+        assert.equal(await page.locator('main > section#vida-personal h2').textContent(), 'Vida personal');
+        // El menú no debe perder el foco al cambiar entre escritorio y tablet.
+        await page.locator('#main-nav a[href="#cumpleanos"]').focus();
+        await page.setViewportSize({ width: 1024, height: 1000 });
+        await page.waitForFunction(() => getComputedStyle(document.querySelector('#main-nav')).display === 'none');
+        assert.equal(await page.locator('.menu-toggle').evaluate(element => element === document.activeElement), true);
+        await page.setViewportSize({ width: 1440, height: 1000 });
+        await page.waitForFunction(() => getComputedStyle(document.querySelector('.menu-toggle')).display === 'none');
+        assert.equal(await page.locator('#main-nav').evaluate(element => element.contains(document.activeElement)), true);
+        await page.goto(base);
         // Esperar también las imágenes diferidas, fuera del primer viewport.
         await page.locator('img[loading="lazy"]').evaluateAll(images => images.forEach(image => { image.loading = 'eager'; }));
         await page.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode().catch(() => {}))));
         await page.screenshot({ path: path.join(output, 'escritorio.png'), fullPage: true });
-        console.log('OK · siete secciones, recursos y vista de escritorio');
+        console.log('OK · nueve secciones, cumpleaños independiente y vida personal');
 
-        for (let stage = 0; stage < 6; stage++) {
+        assert.equal(await page.locator('.stats-ledger thead th').count(), 5);
+        assert.deepEqual(await page.locator('.stats-ledger tr').filter({ has: page.locator('th[scope="row"]', { hasText: /^Partidos$/ }) }).locator('td').allTextContents(), ['778', '75', '123', '208']);
+        assert.equal(await page.locator('.stats-ledger th[scope="row"]').count(), 21);
+        assert.match(await page.locator('.stats-board').evaluate(element => getComputedStyle(element).fontFamily), /Arial/);
+        assert.match(await page.locator('#estadisticas-title').evaluate(element => getComputedStyle(element).fontFamily), /Manrope/);
+        assert.match(await page.locator('.stats-peaks').evaluate(element => getComputedStyle(element).fontFamily), /Arial/);
+        const ledgerCell = page.locator('.stats-ledger tbody td').first();
+        const ledgerBackground = await ledgerCell.evaluate(element => getComputedStyle(element).backgroundColor);
+        await ledgerCell.hover();
+        assert.equal(await ledgerCell.evaluate(element => getComputedStyle(element).backgroundColor), ledgerBackground);
+        assert.equal(await page.locator('.stats-ledger thead th').first().evaluate(element => getComputedStyle(element).position), 'static');
+        assert.match(await page.locator('.peak-year').textContent(), /2012/);
+        assert.equal(await page.locator('.peak-year .peak-score strong').textContent(), '91');
+        assert.equal(await page.locator('.peak-cup .peak-score strong').textContent(), '14');
+        console.log('OK · tablón sin efectos, Arial, título Manrope y mejores ediciones');
+
+        const momentDates = await page.locator('#momentos .moment-card time').evaluateAll(dates => dates.map(date => date.dateTime));
+        assert.equal(momentDates.length, 18);
+        assert.deepEqual(momentDates, [...momentDates].sort(), 'Los momentos deben mantener el orden cronológico');
+        assert.equal(await page.locator('#momentos .moment-card a[target="_blank"][rel="noopener noreferrer"]').count(), 18);
+        for (const link of await page.locator('.moments-index a').all()) {
+            const target = await link.getAttribute('href');
+            await link.focus();
+            await page.keyboard.press('Enter');
+            assert.equal(await page.evaluate(() => location.hash), target);
+            assert.equal(await page.locator(target).count(), 1);
+        }
+        assert.match(await page.locator('.moment-card h4').first().evaluate(element => getComputedStyle(element).fontFamily), /Manrope/);
+        await page.locator('#momentos-comienzos').screenshot({ path: path.join(output, 'momentos-escritorio.png'), style: '.site-header, .skip-link { visibility: hidden; }' });
+        console.log('OK · 18 momentos en orden, fuentes y navegación por teclado entre etapas');
+
+        const careerTabs = page.locator('.career-route [role="tab"]');
+        assert.equal(await careerTabs.count(), 4);
+        for (let index = 0; index < 4; index++) {
+            await careerTabs.nth(index).click();
+            assert.equal(await page.locator('[data-career-panel]:visible').count(), 1);
+            assert.equal(await careerTabs.nth(index).getAttribute('aria-selected'), 'true');
+            assert.deepEqual(await page.locator('[data-career-panel]:visible .career-metrics dt').allTextContents(), ['partidos', 'goles', 'asistencias']);
+            assert.equal(await page.locator('[data-career-panel]:visible img').evaluate(async image => { await image.decode(); return image.naturalWidth > 0; }), true);
+        }
+        await page.keyboard.press('Home');
+        assert.equal(await careerTabs.first().getAttribute('aria-selected'), 'true');
+        await page.keyboard.press('ArrowRight');
+        assert.equal(await careerTabs.nth(1).getAttribute('aria-selected'), 'true');
+        await page.keyboard.press('End');
+        assert.equal(await careerTabs.last().getAttribute('aria-selected'), 'true');
+        console.log('OK · trayectoria: cuatro equipos, imágenes y navegación por teclado');
+
+        const biographyStages = await page.locator('.biography-stage').count();
+        assert.ok(biographyStages > 0);
+        const biographyIds = await page.locator('.biography-stage').evaluateAll(stages => stages.map(stage => {
+            const id = stage.getAttribute('aria-labelledby');
+            if (!stage.querySelector(`[id="${id}"]`)) throw new Error('La etapa debe referenciar su propio título');
+            return id;
+        }));
+        assert.equal(new Set(biographyIds).size, biographyStages);
+        for (let stage = 0; stage < biographyStages; stage++) {
             const copy = page.locator('.biography-stage:visible .biography-copy');
             assert.equal(await copy.locator(':scope > p').count(), 5);
             assert.equal(await copy.locator(':scope > h4').count(), 5);
             assert.equal(await copy.locator(':scope > h4 + p').count(), 5);
-            assert.equal(await page.locator('#bio-position').textContent(), `${stage + 1} / 6`);
-            if (stage < 5) await page.locator('#bio-next').click();
+            assert.equal(await page.locator('#bio-position').textContent(), `${stage + 1} / ${biographyStages}`);
+            assert.equal(await page.locator('.biography-stage:visible img').evaluate(async image => {
+                await image.decode();
+                return image.naturalWidth > 0;
+            }), true);
+            if (stage < biographyStages - 1) await page.locator('#bio-next').click();
         }
         assert.equal(await page.locator('#bio-next').isDisabled(), true);
-        for (let stage = 0; stage < 5; stage++) await page.locator('#bio-prev').click();
+        for (let stage = 0; stage < biographyStages - 1; stage++) await page.locator('#bio-prev').click();
         assert.equal(await page.locator('#bio-prev').isDisabled(), true);
-        console.log('OK · seis etapas con cinco bloques de subtítulo y párrafo');
+        console.log(`OK · ${biographyStages} etapas, imágenes y referencias a sus títulos; cinco bloques por etapa`);
 
         assert.equal(await page.locator('.title-timeline').count(), 3);
         assert.equal(await page.locator('.title-dot').count(), 95);
@@ -139,6 +217,7 @@ fs.mkdirSync(output, { recursive: true });
                 await page.locator('img[loading="lazy"]').evaluateAll(images => images.forEach(image => { image.loading = 'eager'; }));
                 await page.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode().catch(() => {}))));
                 await page.screenshot({ path: path.join(output, 'movil.png'), fullPage: true });
+                await page.locator('#momentos-argentina').screenshot({ path: path.join(output, 'momentos-movil.png'), style: '.site-header, .skip-link { visibility: hidden; }' });
                 await page.locator('.menu-toggle').click();
                 assert.equal(await page.locator('#main-nav').isVisible(), true);
                 await page.keyboard.press('Escape');
@@ -179,7 +258,9 @@ fs.mkdirSync(output, { recursive: true });
         const staticPage = await nojs.newPage();
         await staticPage.goto(base);
         assert.equal(await staticPage.locator('#main-nav').isVisible(), true);
+        assert.equal(await staticPage.locator('.career-feature:visible').count(), 4);
         assert.equal(await staticPage.locator('.title-dot').count(), 95);
+        assert.equal(await staticPage.locator('#momentos .moment-card:visible').count(), 18);
         await nojs.close();
         console.log('OK · lectura y navegación sin JavaScript');
 
